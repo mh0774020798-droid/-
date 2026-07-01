@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "NodeBB Media Icon Replacer",
+  "version": "1.1",
+  "description": "מחליף את טקסט התמונות והסרטונים הארוך בסמלי 🖼️ ו-🎥 בפורומים של NodeBB.",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}

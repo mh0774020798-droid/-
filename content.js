@@ -26,13 +26,12 @@ function updateMediaIcons() {
 const observer = new MutationObserver(() => {
     updateMediaIcons();
     
-    // בדיקה אם עברנו אשכול כדי לאפס את מצב הסגירה
     const topicEl = document.querySelector('[component="topic"]');
     if (topicEl) {
         const currentTopicId = topicEl.getAttribute('data-tid');
         if (currentTopicId !== lastTopicId) {
             lastTopicId = currentTopicId;
-            isClosedByUser = false; // איפוס – באשכול חדש החלונית תחזור
+            isClosedByUser = false; 
             createGeminiSummarizer();
         }
     }
@@ -64,13 +63,11 @@ function setupNotificationAlerts() {
 }
 
 // ==========================================
-// חלק 4: סיכום אשכול ע"י Gemini AI (גרירה, מיזעור, סגירה וקישור למפתח)
+// חלק 4: סיכום אשכול ע"י Gemini AI (מתומצת וממוקד)
 // ==========================================
 function createGeminiSummarizer() {
-    // אם המשתמש סגר את החלונית באשכול זה, או שאנחנו לא באשכול, או שהיא כבר קיימת - לא יוצרים אותה
     if (isClosedByUser || !document.querySelector('[component="topic"]') || document.getElementById('gemini-summarizer-container')) return;
 
-    // יצירת המיכל הראשי
     const container = document.createElement('div');
     container.id = 'gemini-summarizer-container';
     container.style.cssText = `
@@ -80,7 +77,6 @@ function createGeminiSummarizer() {
         font-family: system-ui, sans-serif; direction: rtl; overflow: hidden;
     `;
 
-    // כותרת החלונית (אזור הגרירה)
     const header = document.createElement('div');
     header.id = 'gemini-summarizer-header';
     header.style.cssText = `
@@ -97,12 +93,10 @@ function createGeminiSummarizer() {
     `;
     container.appendChild(header);
 
-    // גוף החלונית
     const body = document.createElement('div');
     body.id = 'gemini-summarizer-body';
     body.style.cssText = `padding: 12px; display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto;`;
 
-    // תיבת קלט למפתח ה-API
     const keyInput = document.createElement('input');
     keyInput.type = 'password';
     keyInput.placeholder = 'הזן מפתח Google Studio API...';
@@ -113,19 +107,16 @@ function createGeminiSummarizer() {
     }
     body.appendChild(keyInput);
 
-    // קישור לעמוד המפתחים של גוגל סטודיו
     const linkContainer = document.createElement('div');
     linkContainer.style.cssText = `font-size: 11px; margin-top: -4px; margin-bottom: 4px;`;
     linkContainer.innerHTML = `<a href="https://aistudio.google.com/api-keys?project=project-c76f0d6b-607f-453b-ab5" target="_blank" style="color: #028090; text-decoration: underline; font-weight: 500;">🔑 לחץ כאן לקבלת מפתח ב-Google Studio</a>`;
     body.appendChild(linkContainer);
 
-    // כפתור ביצוע הסיכום
     const sumBtn = document.createElement('button');
-    sumBtn.innerText = '✨ סכם מהיר ב-Gemini AI';
+    sumBtn.innerText = '✨ סכם תמציתי ב-Gemini AI';
     sumBtn.style.cssText = `background: #00a896; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: background 0.2s;`;
     body.appendChild(sumBtn);
 
-    // אזור הצגת תוצאת הסיכום
     const resultArea = document.createElement('div');
     resultArea.id = 'gemini-result-area';
     resultArea.style.cssText = `font-size: 13px; color: #222; line-height: 1.6; white-space: pre-wrap; margin-top: 5px; border-top: 1px dashed #ddd; padding-top: 8px;`;
@@ -134,7 +125,7 @@ function createGeminiSummarizer() {
     container.appendChild(body);
     document.body.appendChild(container);
 
-    // 1. מנגנון גרירה (Drag and Drop)
+    // מנגנון גרירה
     let isDragging = false;
     let currentX = 0, currentY = 0, initialX = 0, initialY = 0;
     let xOffset = 0, yOffset = 0;
@@ -164,7 +155,7 @@ function createGeminiSummarizer() {
         isDragging = false;
     }
 
-    // 2. מנגנון מיזעור והרחבה
+    // מנגנון מיזעור
     const minimizeBtn = document.getElementById('gemini-minimize-btn');
     minimizeBtn.onclick = () => {
         if (body.style.display === 'none') {
@@ -176,14 +167,14 @@ function createGeminiSummarizer() {
         }
     };
 
-    // 3. מנגנון סגירה סופית באשכול הנוכחי
+    // מנגנון סגירה
     const closeBtn = document.getElementById('gemini-close-btn');
     closeBtn.onclick = () => {
         isClosedByUser = true;
         container.remove();
     };
 
-    // אירוע לחיצה על כפתור הסיכום
+    // הפעלת הסיכום
     sumBtn.onclick = async () => {
         const apiKey = keyInput.value.trim();
         if (!apiKey) { alert('אנא הכנס מפתח API קודם לכן.'); return; }
@@ -203,7 +194,7 @@ function createGeminiSummarizer() {
 
         if (!threadContent) { resultArea.innerText = "לא נמצא תוכן לסיכום."; return; }
 
-        resultArea.innerHTML = "⏳ Gemini מנתח את האשכול, אנא המתן...";
+        resultArea.innerHTML = "⏳ Gemini מנתח את האשכול באופן תמציתי...";
         sumBtn.disabled = true;
 
         try {
@@ -213,15 +204,15 @@ function createGeminiSummarizer() {
                 body: JSON.stringify({
                     contents: [{
                         parts: [{
-                            text: `אתה אנליסט מומחה שתפקידו לסכם אשכול פורום מורכב בצורה המקצועית, העמוקה והברורה ביותר בעברית.
-הנה תוכן האשכול (הודעות מופרדות ב- ---):
-\n${threadContent}\n
-אנא בצע ניתוח וסיכום ברמה גבוהה מאוד לפי המבנה הבא:
-1. 🎯 **הנושא המרכזי / מהות הדיון:** (תמצות קצר של הבעיה או הנושא שהועלה בפוסט הראשון).
-2. 💬 **נקודות מרכזיות ועמדות בולטות:** (מה היו הפתרונות, הרעיונות או חילוקי הדעות העיקריים שעלו מצד המשתמשים השונים).
-3. 🏁 **שורה תחתונה / מסקנה:** (האם נמצא פתרון? מהי המסקנה הסופית של האשכול).
+                            text: `בצע סיכום קצר, תמציתי וממוקד מאוד (בנקודות קצרות וברורות) של אשכול הפורום הבא בעברית. 
+אל תרחיב במילים, תהיה ענייני וישר לעניין:
 
-כתוב בצורה קולחת, אינטליגנטית ומאורגנת היטב.`
+${threadContent}
+
+מבנה נדרש:
+🎯 **הנושא:** (בשורה אחת)
+💬 **נקודות מרכזיות:** (2-4 נקודות קצרות על מה שנאמר)
+🏁 **שורה תחתונה:** (המסקנה או הפתרון הסופי)`
                         }]
                     }]
                 })
@@ -232,7 +223,7 @@ function createGeminiSummarizer() {
                 resultArea.innerText = data.candidates[0].content.parts[0].text;
             } else {
                 console.error("Gemini Error Response:", data);
-                resultArea.innerText = "שגיאה: לא התקבלה תשובה תקינה מהמודל. ודא שהמפתח תקין ופעיל.";
+                resultArea.innerText = "שגיאה: לא התקבלה תשובה תקינה מהמודל.";
             }
         } catch (err) {
             console.error(err);
